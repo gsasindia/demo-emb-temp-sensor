@@ -30,44 +30,55 @@ No external sensors or wiring needed — uses the STM32U575's internal temperatu
 2. Open the SQL Editor and run `supabase/schema.sql`
 3. Copy your project URL and anon key
 
-### 2. Firmware (Keil Studio)
+### 2. Firmware (Keil Studio for VS Code)
 
 #### Prerequisites
-- A [Keil Studio Cloud](https://studio.keil.arm.com) account (free with Arm login)
+- [VS Code](https://code.visualstudio.com/) installed
+- **Arm Keil Studio Pack** extension installed from the VS Code Marketplace (extension ID: `Arm.keil-studio-pack`)
+- **CMSIS-Toolbox** and **Arm Compiler 6** — installed automatically by the extension on first launch
 - NUCLEO-U575ZI-Q connected via USB
-- Chrome or Edge browser (needed for WebUSB flashing)
 
 #### Steps
 
-1. Open [Keil Studio Cloud](https://studio.keil.arm.com) in your browser
-2. Click **File → Import Project…** and paste this repo URL:
+1. Clone this repo and open it in VS Code:
+   ```bash
+   git clone https://github.com/gsasindia/demo-emb-temp-sensor.git
+   code demo-emb-temp-sensor
    ```
-   https://github.com/gsasindia/demo-emb-temp-sensor
-   ```
-3. Keil Studio will detect the `firmware/` directory. If prompted, set:
-   - **Target**: `NUCLEO-U575ZI-Q`
-   - **Toolchain**: AC6 (Arm Compiler 6) or GCC
-4. Ensure the following source files are included in the build:
+2. Open the **CMSIS** sidebar (Arm icon in the Activity Bar)
+3. Click **Create New Solution** (or open an existing `.csolution.yml` if present):
+   - **Device**: `STM32U575ZITxQ`
+   - **Compiler**: AC6 (Arm Compiler 6)
+4. Add the source files to your project:
    - `firmware/src/main.c`
    - `firmware/src/temp_sensor.c`
-5. You may need to add the STM32U5 CMSIS/HAL pack if not auto-resolved:
-   - Open **CMSIS Pack Manager** (sidebar)
-   - Search for `STM32U5xx_DFP` and install it
-6. Click **Build** (hammer icon) — confirm it compiles with no errors
-7. Click **Run** (play icon) to flash the firmware to the board
-8. Open the built-in **Serial Monitor** (or any serial terminal):
-   - Port: the ST-Link VCP (auto-detected)
-   - Baud: **115200**
-9. You should see a JSON line every 2 minutes:
-   ```json
-   {"temp_c":24.7,"ts":120000}
-   ```
-   The green LED (LD1) blinks on each reading.
+   - `firmware/src/main.h`
+   - `firmware/src/temp_sensor.h`
+5. Add required CMSIS packs via the **Manage Software Packs** view:
+   - `Keil::STM32U5xx_DFP` (device family pack)
+   - `ARM::CMSIS` (core CMSIS headers)
+6. Click **Build** in the CMSIS sidebar — confirm it compiles with no errors
+7. Click **Run** (or **Download to Device**) to flash the firmware to the board
+8. Open a serial terminal to verify output:
+   - In VS Code: use the **Serial Monitor** extension or the built-in terminal with a tool like `screen`:
+     ```bash
+     # macOS
+     screen /dev/tty.usbmodem* 115200
+     # Linux
+     screen /dev/ttyACM0 115200
+     # Windows — use PuTTY or the Serial Monitor extension with the appropriate COM port
+     ```
+   - You should see a JSON line every 2 minutes:
+     ```json
+     {"temp_c":24.7,"ts":120000}
+     ```
+   - The green LED (LD1) blinks on each reading
 
 #### Troubleshooting
-- **Board not detected**: Make sure you're using Chrome/Edge and click "Connect Board" in the bottom status bar
+- **Board not detected**: Check USB connection; install [ST-Link drivers](https://www.st.com/en/development-tools/stsw-link009.html) if on Windows
 - **No serial output**: Verify LPUART1 is routed to ST-Link VCP (PA9/PA10 — default on this Nucleo)
-- **Build errors about missing HAL headers**: Install the `STM32U5xx_DFP` pack from the CMSIS Pack Manager
+- **Build errors about missing HAL headers**: Ensure `Keil::STM32U5xx_DFP` is installed in the CMSIS Pack Manager
+- **"No device connected"**: Click the device selector in the CMSIS sidebar and pick `NUCLEO-U575ZI-Q`
 
 ### 3. Serial Bridge
 
