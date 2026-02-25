@@ -30,11 +30,44 @@ No external sensors or wiring needed — uses the STM32U575's internal temperatu
 2. Open the SQL Editor and run `supabase/schema.sql`
 3. Copy your project URL and anon key
 
-### 2. Firmware
+### 2. Firmware (Keil Studio)
 
-1. Open `firmware/` in STM32CubeIDE or Keil Studio
-2. Build and flash to the Nucleo-U575ZI-Q
-3. The board outputs JSON over USB serial at 115200 baud every 2 minutes
+#### Prerequisites
+- A [Keil Studio Cloud](https://studio.keil.arm.com) account (free with Arm login)
+- NUCLEO-U575ZI-Q connected via USB
+- Chrome or Edge browser (needed for WebUSB flashing)
+
+#### Steps
+
+1. Open [Keil Studio Cloud](https://studio.keil.arm.com) in your browser
+2. Click **File → Import Project…** and paste this repo URL:
+   ```
+   https://github.com/gsasindia/demo-emb-temp-sensor
+   ```
+3. Keil Studio will detect the `firmware/` directory. If prompted, set:
+   - **Target**: `NUCLEO-U575ZI-Q`
+   - **Toolchain**: AC6 (Arm Compiler 6) or GCC
+4. Ensure the following source files are included in the build:
+   - `firmware/src/main.c`
+   - `firmware/src/temp_sensor.c`
+5. You may need to add the STM32U5 CMSIS/HAL pack if not auto-resolved:
+   - Open **CMSIS Pack Manager** (sidebar)
+   - Search for `STM32U5xx_DFP` and install it
+6. Click **Build** (hammer icon) — confirm it compiles with no errors
+7. Click **Run** (play icon) to flash the firmware to the board
+8. Open the built-in **Serial Monitor** (or any serial terminal):
+   - Port: the ST-Link VCP (auto-detected)
+   - Baud: **115200**
+9. You should see a JSON line every 2 minutes:
+   ```json
+   {"temp_c":24.7,"ts":120000}
+   ```
+   The green LED (LD1) blinks on each reading.
+
+#### Troubleshooting
+- **Board not detected**: Make sure you're using Chrome/Edge and click "Connect Board" in the bottom status bar
+- **No serial output**: Verify LPUART1 is routed to ST-Link VCP (PA9/PA10 — default on this Nucleo)
+- **Build errors about missing HAL headers**: Install the `STM32U5xx_DFP` pack from the CMSIS Pack Manager
 
 ### 3. Serial Bridge
 
